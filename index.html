@@ -1,0 +1,2029 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CCAR-F / CCAF Interactive Study Hub (Updated Oct 2026)</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --surface: #ffffff;
+      --surface-alt: #eef0f5;
+      --border: #dadce3;
+      --text: #191b1f;
+      --text-muted: #5a6069;
+      --accent: #6e44ff;
+      --accent-soft: rgba(110, 68, 255, 0.11);
+      --accent-contrast: #ffffff;
+      --correct: #1a7f37;
+      --correct-bg: #dafbe1;
+      --incorrect: #cf222e;
+      --incorrect-bg: #ffebe9;
+      --warning: #b56200;
+      --warning-bg: #fff5e6;
+      --warning-border: #f0a43c;
+      --info: #0969da;
+      --info-bg: #ddf4ff;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111317;
+        --surface: #1a1d23;
+        --surface-alt: #232730;
+        --border: #313642;
+        --text: #eceef2;
+        --text-muted: #9da4b0;
+        --accent: #9b7bff;
+        --accent-soft: rgba(155, 123, 255, 0.16);
+        --accent-contrast: #111317;
+        --correct: #3fb950;
+        --correct-bg: rgba(63, 185, 80, 0.16);
+        --incorrect: #ff7b72;
+        --incorrect-bg: rgba(255, 123, 114, 0.16);
+        --warning: #f0b757;
+        --warning-bg: rgba(240, 164, 60, 0.14);
+        --warning-border: #9a6e22;
+        --info: #58a6ff;
+        --info-bg: rgba(88, 166, 255, 0.15);
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* Top Navigation Bar */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.6rem 1.2rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .badge {
+      background: var(--accent);
+      color: var(--accent-contrast);
+      font-size: 0.72rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 99px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-warn {
+      background: var(--warning-bg);
+      color: var(--warning);
+      border: 1px solid var(--warning-border);
+      font-size: 0.7rem;
+      padding: 0.1rem 0.45rem;
+      border-radius: 99px;
+      font-weight: 700;
+    }
+
+    .mode-tabs {
+      display: flex;
+      gap: 0.3rem;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      font: inherit;
+      font-size: 0.84rem;
+      font-weight: 600;
+      padding: 0.42rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+      background: var(--surface-alt);
+    }
+
+    .tab-btn.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .progress-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .progress-bar-wrap {
+      width: 90px;
+      height: 8px;
+      background: var(--surface-alt);
+      border-radius: 99px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--correct);
+      width: 0%;
+      transition: width 0.25s ease;
+    }
+
+    /* Layout */
+    .layout {
+      display: grid;
+      grid-template-columns: 295px 1fr;
+      min-height: calc(100vh - 54px);
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 0.9rem 0.7rem;
+      overflow-y: auto;
+    }
+
+    .sidebar-title {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin: 0.3rem 0.5rem 0.5rem;
+    }
+
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .step-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      width: 100%;
+      text-align: left;
+      font: inherit;
+      font-size: 0.85rem;
+      padding: 0.5rem 0.6rem;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .step-btn:hover { background: var(--surface-alt); }
+    .step-btn.active {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+
+    .step-check {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.68rem;
+      flex-shrink: 0;
+    }
+
+    .step-btn.done .step-check {
+      background: var(--correct);
+      border-color: var(--correct);
+      color: #fff;
+    }
+
+    .step-weight {
+      margin-left: auto;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      background: var(--surface-alt);
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .step-weight.hot {
+      background: var(--warning-bg);
+      color: var(--warning);
+      border: 1px solid var(--warning-border);
+      font-weight: 700;
+    }
+
+    /* Content Area */
+    .content-area {
+      max-width: 920px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem 1.5rem 4rem;
+    }
+
+    .step-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font: inherit;
+      font-size: 0.84rem;
+      font-weight: 600;
+      padding: 0.42rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      text-decoration: none;
+    }
+
+    .btn:hover:not(:disabled) { border-color: var(--accent); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-primary {
+      background: var(--accent);
+      color: var(--accent-contrast);
+      border-color: var(--accent);
+    }
+
+    .btn-success {
+      background: var(--correct);
+      color: #fff;
+      border-color: var(--correct);
+    }
+
+    /* Drift Banner Callout */
+    .drift-banner {
+      margin: 1rem 0 1.4rem;
+      padding: 0.9rem 1.1rem;
+      border-radius: 10px;
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      font-size: 0.9rem;
+    }
+
+    .drift-banner-title {
+      font-weight: 700;
+      color: var(--warning);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.4rem;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .drift-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.65rem;
+      margin-top: 0.5rem;
+    }
+
+    @media (max-width: 680px) {
+      .drift-grid { grid-template-columns: 1fr; }
+    }
+
+    .drift-box {
+      padding: 0.6rem 0.8rem;
+      border-radius: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: 0.86rem;
+    }
+
+    .drift-box strong.exam-tag {
+      color: var(--correct);
+      display: block;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      margin-bottom: 0.2rem;
+    }
+
+    .drift-box strong.live-tag {
+      color: var(--info);
+      display: block;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      margin-bottom: 0.2rem;
+    }
+
+    /* Markdown Rendered Styles */
+    .md-content h1 { font-size: 1.6rem; margin-top: 0; margin-bottom: 0.5rem; }
+    .md-content h2 {
+      font-size: 1.25rem;
+      margin-top: 2rem;
+      padding-top: 1.1rem;
+      border-top: 1px solid var(--border);
+    }
+    .md-content h3 { font-size: 1.05rem; margin-top: 1.4rem; color: var(--accent); }
+
+    .md-content pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      overflow-x: auto;
+      font-size: 0.84rem;
+      line-height: 1.45;
+    }
+
+    .md-content code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background: var(--surface-alt);
+      padding: 0.12em 0.35em;
+      border-radius: 4px;
+      font-size: 0.88em;
+    }
+
+    .md-content pre code { background: transparent; padding: 0; }
+
+    .md-content blockquote {
+      margin: 1rem 0;
+      padding: 0.75rem 1rem;
+      background: var(--warning-bg);
+      border-left: 4px solid var(--warning-border);
+      border-radius: 0 8px 8px 0;
+    }
+
+    .cite-ref {
+      font-size: 0.72em;
+      vertical-align: super;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 0.05rem 0.3rem;
+      border-radius: 4px;
+      margin: 0 1px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* Interactive Tables */
+    .table-wrap {
+      margin: 1rem 0 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow-x: auto;
+      background: var(--surface);
+    }
+
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.45rem 0.85rem;
+      background: var(--surface-alt);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    table.study-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    table.study-table th,
+    table.study-table td {
+      padding: 0.6rem 0.8rem;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    table.study-table tr:last-child td { border-bottom: none; }
+    table.study-table th {
+      background: var(--surface-alt);
+      font-weight: 700;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    td.blinded {
+      cursor: pointer;
+      position: relative;
+      user-select: none;
+    }
+
+    td.blinded > .cell-inner {
+      filter: blur(6px);
+      opacity: 0.28;
+      transition: all 0.15s ease;
+    }
+
+    td.blinded::after {
+      content: "Click to reveal";
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    td.blinded.revealed > .cell-inner {
+      filter: none;
+      opacity: 1;
+    }
+    td.blinded.revealed::after { display: none; }
+
+    /* Interactive Practice Question Card */
+    .practice-card {
+      margin: 1.35rem 0;
+      padding: 1.15rem 1.25rem;
+      background: var(--surface);
+      border: 2px solid var(--accent-soft);
+      border-radius: 12px;
+    }
+
+    .practice-card.official-sample {
+      border-color: var(--warning-border);
+    }
+
+    .practice-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .practice-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 0.15rem 0.55rem;
+      border-radius: 6px;
+    }
+
+    .practice-badge.official {
+      color: var(--warning);
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+    }
+
+    .practice-stem {
+      font-weight: 600;
+      margin: 0.25rem 0 0.9rem;
+    }
+
+    .practice-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .practice-opt {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      padding: 0.6rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+      font: inherit;
+      font-size: 0.9rem;
+    }
+
+    .practice-opt:hover { border-color: var(--accent); }
+    .practice-opt.correct {
+      background: var(--correct-bg);
+      border-color: var(--correct);
+      font-weight: 600;
+    }
+    .practice-opt.wrong {
+      background: var(--incorrect-bg);
+      border-color: var(--incorrect);
+    }
+
+    .practice-rationale {
+      margin-top: 0.85rem;
+      padding: 0.75rem 0.95rem;
+      border-radius: 8px;
+      background: var(--surface-alt);
+      border-left: 4px solid var(--accent);
+      font-size: 0.88rem;
+    }
+
+    /* Lab / Drift Cards */
+    .lab-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .lab-section h2 {
+      margin-top: 0;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .scope-sorter-card {
+      padding: 1.25rem;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-align: center;
+      margin-top: 0.75rem;
+    }
+
+    .scope-topic {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 0.75rem 0 1rem;
+    }
+
+    .checklist-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 0.85rem;
+      margin-top: 0.85rem;
+    }
+
+    .exercise-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.95rem;
+      background: var(--bg);
+    }
+
+    .exercise-card h3 {
+      margin: 0 0 0.35rem;
+      font-size: 0.98rem;
+      color: var(--accent);
+    }
+
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      margin: 0.45rem 0;
+      cursor: pointer;
+    }
+
+    .check-item input { margin-top: 0.25rem; }
+    .check-item.checked span {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    /* Flashcards Mode */
+    .flashcard-container {
+      max-width: 700px;
+      margin: 2rem auto;
+      padding: 0 1.25rem;
+    }
+
+    .flashcard-controls {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .flashcard-box {
+      min-height: 270px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 1.85rem 1.75rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .flashcard-box:hover { border-color: var(--accent); }
+    .flashcard-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .flashcard-body {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin: 1.35rem 0;
+    }
+
+    .flashcard-answer {
+      margin-top: 0.9rem;
+      padding-top: 0.9rem;
+      border-top: 1px dashed var(--border);
+      color: var(--correct);
+      font-weight: 600;
+    }
+
+    .flashcard-why {
+      margin-top: 0.4rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .step-nav-footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 2.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+
+    select.filter-select {
+      font: inherit;
+      font-size: 0.85rem;
+      padding: 0.42rem 0.7rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="brand">
+      <span class="badge">CCAR-F</span>
+      <span>Interactive Study Hub</span>
+      <span class="badge-warn">Oct 2026 Drift Ready</span>
+    </div>
+
+    <nav class="mode-tabs">
+      <button type="button" class="tab-btn active" data-mode="reader">1. Study Guide (12 Steps)</button>
+      <button type="button" class="tab-btn" data-mode="drift">2. ⚡ Oct 2026 Drift &amp; Labs</button>
+      <button type="button" class="tab-btn" data-mode="quiz">3. ★ 12 Official Sample Qs + Drills</button>
+      <button type="button" class="tab-btn" data-mode="flashcards">4. Flashcards</button>
+      <button type="button" class="tab-btn" data-mode="exams">5. Timed Mock Exams (360 Qs)</button>
+    </nav>
+
+    <div class="progress-pill">
+      <span id="overallProgressText">0 / 12 steps</span>
+      <div class="progress-bar-wrap">
+        <div id="overallProgressBar" class="progress-bar-fill"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MODE 1: STEP-BY-STEP READER -->
+  <div id="mode-reader" class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-title">Recommended Study Sequence</div>
+      <div id="stepList" class="step-list"></div>
+    </aside>
+
+    <main class="content-area">
+      <div class="step-header-bar">
+        <div>
+          <strong id="currentStepLabel">Loading...</strong>
+        </div>
+        <div style="display:flex; gap:0.45rem; flex-wrap:wrap;">
+          <button type="button" id="toggleBlindAllBtn" class="btn">Test Yourself: Hide Table Answers</button>
+          <button type="button" id="markStepDoneBtn" class="btn btn-primary">Mark Step Complete</button>
+        </div>
+      </div>
+
+      <div id="stepDriftCallout"></div>
+      <article id="mdContainer" class="md-content"></article>
+
+      <div class="step-nav-footer">
+        <button type="button" id="prevStepBtn" class="btn">&larr; Previous Step</button>
+        <button type="button" id="nextStepBtn" class="btn btn-primary">Next Step &rarr;</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODE 2: OCT 2026 DRIFT, SCOPE SORTER & HANDS-ON LABS -->
+  <div id="mode-drift" hidden>
+    <div class="content-area">
+
+      <!-- Section A: Guide v1.0 vs Oct 2026 Live Docs Trainer -->
+      <div class="lab-section">
+        <h2>
+          <span>⚡ Exam Guide (v1.0) vs. Current Live Docs (Oct 2026) Trainer</span>
+          <div style="display:flex; gap:0.4rem;">
+            <button type="button" class="btn" id="blindExamColBtn">Quiz: Hide Exam Answers</button>
+            <button type="button" class="btn" id="blindLiveColBtn">Quiz: Hide Live Docs</button>
+          </div>
+        </h2>
+        <p style="margin-top:0; color:var(--text-muted); font-size:0.9rem;">
+          <strong>Golden Exam Strategy:</strong> CCAR-F is graded against the <strong>July 2026 v1.0 Exam Guide</strong>. Even if you use newer Claude Code / API features at work, pick the <strong>Exam Guide v1.0</strong> answer on test day. Click any blurred cell below to test yourself.
+        </p>
+        <div class="table-wrap">
+          <table class="study-table" id="driftTrainerTable">
+            <thead>
+              <tr>
+                <th style="width:18%;">Topic / Domain</th>
+                <th style="width:41%;">✅ Exam Answer (v1.0 Blueprint — Pick This!)</th>
+                <th style="width:41%;">📘 Current Live Docs (Oct 2026 Reality)</th>
+              </tr>
+            </thead>
+            <tbody id="driftTrainerBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section B: Interactive In-Scope vs Out-of-Scope Sorter -->
+      <div class="lab-section">
+        <h2>
+          <span>🎯 Interactive "In-Scope vs. Out-of-Scope" Distractor Sorter</span>
+          <span id="scopeScoreBadge" class="badge">Score: 0 / 0</span>
+        </h2>
+        <p style="margin-top:0; color:var(--text-muted); font-size:0.9rem;">
+          Wrong options on the exam often name real Claude features that are <strong>explicitly out of scope</strong> (Appendix §17) or violate the "bigger model / context window rarely fixes architecture" rule. Test whether each topic below is <strong>In-Scope</strong> or an <strong>Out-of-Scope Trap</strong>:
+        </p>
+        <div class="scope-sorter-card">
+          <div style="font-size:0.78rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;" id="scopeProgress">Item 1 of 14</div>
+          <div class="scope-topic" id="scopePromptText">Loading...</div>
+          <div style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+            <button type="button" class="btn btn-primary" id="btnInScope">✅ In-Scope (Tested on CCAR-F)</button>
+            <button type="button" class="btn" id="btnOutScope">🚫 Out-of-Scope / Exam Trap</button>
+          </div>
+          <div id="scopeFeedback" class="practice-rationale" style="text-align:left; margin-top:1rem;" hidden></div>
+          <div style="margin-top:0.85rem;">
+            <button type="button" class="btn" id="nextScopeBtn">Next Item &rarr;</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section C: Official Section 8 Hands-On Preparation Exercises Checklist -->
+      <div class="lab-section">
+        <h2>
+          <span>🛠️ The 4 Official Preparation Exercises (Exam Guide §8)</span>
+          <span id="labCheckProgress" class="badge-warn">0 / 19 tasks done</span>
+        </h2>
+        <p style="margin-top:0; color:var(--text-muted); font-size:0.9rem;">
+          The research report and Exam Guide §8 emphasize building these 4 miniature exercises before exam day. Check off each step as you build or walk through it:
+        </p>
+        <div id="exercisesGrid" class="checklist-grid"></div>
+      </div>
+
+      <!-- Section D: Policy & Exam-Day Logistics Checklist (Oct 2026) -->
+      <div class="lab-section">
+        <h2>
+          <span>📋 Oct 2026 Policy &amp; Logistics Alerts</span>
+        </h2>
+        <div class="drift-grid">
+          <div class="drift-box">
+            <strong class="exam-tag">🗓️ Dec 7, 2026 Refresh Watch (Check Nov 17)</strong>
+            Pearson VUE announced content updates on <strong>Dec 7, 2026</strong> for Associate (<code>CCAO-F</code>, $99), Developer (<code>CCDV-F</code>, $125), and Architect – Professional (<code>CCAR-P</code>, $175), with new guides dropping <strong>Nov 17, 2026</strong>. <code>CCAR-F</code> ($125) is <strong>not</strong> on the refresh list—testing before Dec 7 guarantees the current v1.0 blueprint.
+          </div>
+          <div class="drift-box">
+            <strong class="live-tag">⏰ 48-Hour vs. 24-Hour Reschedule Conflict</strong>
+            The v1.0 PDF (§11) says 24 hours, but <strong>Pearson VUE &amp; the official FAQ require 48 hours</strong> to cancel or reschedule without forfeiting the $125 fee. Always plan around <strong>48 hours</strong>.
+          </div>
+          <div class="drift-box">
+            <strong class="exam-tag">🏢 Eligibility &amp; Discounts</strong>
+            Requires a <strong>Claude Partner Network</strong> company email (age 18+). Select/Preferred partners get <strong>50% off</strong>; Global Premier partners get <strong>100% off through Dec 31, 2026</strong>.
+          </div>
+          <div class="drift-box">
+            <strong class="live-tag">⏱️ Pacing &amp; Model Deprecations</strong>
+            Plan <strong>~135 minutes total seat time</strong> (120 min for 60 items = <strong>2 min/question</strong>). Current models (Fable 5.1, Opus 5.5, Sonnet 5.5, Haiku 5.5) are context only; Sonnet 4.5 retires <strong>Nov 30, 2026</strong>.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODE 3: OFFICIAL 12 SAMPLE QUESTIONS + DOMAIN DRILLS + DRIFT QUIZ -->
+  <div id="mode-quiz" hidden>
+    <div class="content-area">
+      <div class="step-header-bar">
+        <div>
+          <strong>Interactive Calibration &amp; Practice Bank</strong>
+          <span id="drillScore" style="margin-left:0.6rem; color:var(--text-muted); font-size:0.88rem;"></span>
+        </div>
+        <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+          <select id="quizDomainFilter" class="filter-select">
+            <option value="official">★ Official 12 Exam Guide Sample Questions (Must-Do Calibration)</option>
+            <option value="drift">⚡ Oct 2026 Drift &amp; Policy Questions (8 Qs)</option>
+            <option value="all">All 42 Questions (Official + Drift + Domain Checks)</option>
+            <option value="d1">Domain 1: Agentic Architecture (27%)</option>
+            <option value="d3">Domain 3: Claude Code Workflows (20%)</option>
+            <option value="d2">Domain 2: Tool Design &amp; MCP (18%)</option>
+            <option value="d4">Domain 4: Prompt Engineering (20%)</option>
+            <option value="d5">Domain 5: Context &amp; Reliability (15%)</option>
+          </select>
+          <button type="button" id="paceTimerBtn" class="btn">⏱️ Start 2-Min/Q Pace Timer</button>
+          <span id="paceTimerDisplay" class="badge-warn" hidden>00:00</span>
+          <button type="button" id="resetQuizBtn" class="btn">Reset</button>
+        </div>
+      </div>
+      <div id="quizList"></div>
+    </div>
+  </div>
+
+  <!-- MODE 4: FLASHCARDS -->
+  <div id="mode-flashcards" hidden>
+    <div class="flashcard-container">
+      <div class="flashcard-controls">
+        <select id="fcFilter" class="filter-select">
+          <option value="all">All Cards (Drift + Cheat Sheet + Anti-Patterns)</option>
+          <option value="updates">⚡ Oct 2026 Guide-vs-Docs Drift &amp; Policy</option>
+          <option value="cheat">Cheat Sheet Fast-Lookups Only</option>
+          <option value="d1">Domain 1: Agentic Architecture</option>
+          <option value="d2">Domain 2: Tool Design &amp; MCP</option>
+          <option value="d3">Domain 3: Claude Code Workflows</option>
+          <option value="d4">Domain 4: Prompt Engineering</option>
+          <option value="d5">Domain 5: Context &amp; Reliability</option>
+        </select>
+        <div style="display:flex; gap:0.4rem;">
+          <button type="button" id="fcShuffleBtn" class="btn">Shuffle</button>
+          <span id="fcCounter" class="btn" style="cursor:default;">1 / 1</span>
+        </div>
+      </div>
+
+      <div id="fcBox" class="flashcard-box">
+        <div class="flashcard-meta">
+          <span id="fcSource">Domain</span>
+          <span>Click or press Space to flip</span>
+        </div>
+        <div id="fcFront" class="flashcard-body">Loading cards...</div>
+        <div id="fcBack" hidden>
+          <div id="fcFix" class="flashcard-answer"></div>
+          <div id="fcWhy" class="flashcard-why"></div>
+        </div>
+        <div style="font-size:0.78rem; color:var(--text-muted);">
+          Tip: Use <strong>&larr;</strong> / <strong>&rarr;</strong> arrow keys to navigate, <strong>Space</strong> to flip.
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; margin-top:1rem;">
+        <button type="button" id="fcPrevBtn" class="btn">&larr; Previous Card</button>
+        <button type="button" id="fcFlipBtn" class="btn btn-primary">Flip Card (Space)</button>
+        <button type="button" id="fcNextBtn" class="btn">Next Card &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODE 5: TIMED MOCK EXAMS -->
+  <div id="mode-exams" hidden>
+    <iframe src="mock-exam/interactive/index.html" style="width:100%; height:calc(100vh - 56px); border:none; display:block;" title="CCAF Mock Exam Player"></iframe>
+  </div>
+
+  <script>
+    const STEPS = [
+      { id: 'updates', title: '0. ⚡ Oct 2026 Updates & Drift', weight: 'NEW', hot: true, file: 'study-guide/oct-2026-updates.md' },
+      { id: 'about', title: '1. About the Exam', weight: 'Basics', file: 'study-guide/about-the-exam.md' },
+      { id: 'plan', title: '2. Study Plan', weight: 'Track', file: 'study-guide/study-plan.md' },
+      { id: 'd1', title: '3. Domain 1: Agentic Arch.', weight: '27%', file: 'study-guide/domain-1-agentic-architecture.md' },
+      { id: 'd3', title: '4. Domain 3: Claude Code', weight: '20%', file: 'study-guide/domain-3-claude-code-workflows.md' },
+      { id: 'd2', title: '5. Domain 2: Tool & MCP', weight: '18%', file: 'study-guide/domain-2-tool-design-mcp.md' },
+      { id: 'd4', title: '6. Domain 4: Prompt Eng.', weight: '20%', file: 'study-guide/domain-4-prompt-engineering.md' },
+      { id: 'd5', title: '7. Domain 5: Context & Rel.', weight: '15%', file: 'study-guide/domain-5-context-reliability.md' },
+      { id: 'scenarios', title: '8. The 6 Exam Scenarios', weight: 'Map', file: 'study-guide/scenarios.md' },
+      { id: 'cheat', title: '9. Final Cheat Sheet', weight: 'Skim', file: 'study-guide/cheat-sheet.md' },
+      { id: 'resources', title: '10. Official Resources & Labs', weight: 'Ref', file: 'study-guide/resources.md' },
+      { id: 'faq', title: '11. Exam FAQ', weight: 'FAQ', file: 'study-guide/faq.md' }
+    ];
+
+    const DRIFT_ITEMS = [
+      {
+        stepId: 'd1',
+        topic: 'Subagent Spawning Tool (Domain 1.2–1.3)',
+        examAnswer: 'Coordinator spawns subagents via the <code>Task</code> tool; <code>allowedTools</code> must include <code>"Task"</code>.',
+        liveDocs: 'In Claude Code v2.1.63+, the <code>Task</code> tool was renamed to <code>Agent</code> (<code>Task(...)</code> still works as an alias).'
+      },
+      {
+        stepId: 'd3',
+        topic: 'Slash Commands vs. Skills (Domain 3.2)',
+        examAnswer: 'Project slash commands go in <code>.claude/commands/</code>; skills go in <code>.claude/skills/&lt;name&gt;/SKILL.md</code>.',
+        liveDocs: 'Custom slash commands have been merged into Skills. <code>.claude/commands/</code> still works, and a skill wins if both exist at the same name.'
+      },
+      {
+        stepId: 'd3',
+        topic: 'SKILL.md allowed-tools Frontmatter (Domain 3.2)',
+        examAnswer: '<code>allowed-tools</code> restricts which tools a skill can use (e.g., limiting to file write only to prevent destructive actions).',
+        liveDocs: '<code>allowed-tools</code> now pre-approves tools to run without asking permission; <code>disallowed-tools</code> removes tools from the available pool.'
+      },
+      {
+        stepId: 'd3',
+        topic: 'CLAUDE.md Imports & Memory Inspection (Domain 3.1)',
+        examAnswer: 'Use <code>@import path/to/file.md</code> for modularity and <code>/memory</code> to inspect loaded memory files.',
+        liveDocs: 'Syntax is <code>@path/to/file</code> (imports load upfront and do not save context; <code>.claude/rules/</code> with <code>paths</code> does). Run <code>/context</code> alongside <code>/memory</code>.'
+      },
+      {
+        stepId: 'd4',
+        topic: 'Guaranteed Structured Output (Domain 4.1 / 4.3)',
+        examAnswer: 'Use <code>tool_use</code> with a JSON schema + <code>tool_choice: "any"</code> (multiple schemas) or forced tool selection.',
+        liveDocs: 'Structured outputs are now GA via <code>output_config.format</code> (JSON outputs) and <code>strict: true</code> on tools.'
+      },
+      {
+        stepId: 'd2',
+        topic: 'Forced tool_choice ("any" or named tool) (Domain 2.3 / 4.3)',
+        examAnswer: 'Use <code>tool_choice: "any"</code> to guarantee a tool call, or <code>{"type": "tool", "name": "X"}</code> to force tool X first.',
+        liveDocs: 'Forced <code>tool_choice</code> returns a <strong>400 error</strong> on newer 5.x models (Fable 5.1, Opus 5.5, Sonnet 5.5); live code uses <code>auto</code> + <code>strict: true</code>.'
+      },
+      {
+        stepId: 'd4',
+        topic: 'Message Batches API & Tool Calling (Domain 4.5)',
+        examAnswer: 'Message Batches API (50% savings, <=24h window) does NOT support multi-turn tool calling mid-request.',
+        liveDocs: 'Batches can include multi-turn history and run Anthropic server-side tools, though they still cannot execute a client-side tool loop mid-request.'
+      },
+      {
+        stepId: 'about',
+        topic: 'Reschedule Window & Official Practice Exam (Exam Policy)',
+        examAnswer: 'v1.0 Guide §11 says 24h reschedule window; 60 items, 120m, 720/1000 pass score, $125 fee.',
+        liveDocs: 'Pearson VUE & FAQ enforce a <strong>48-hour</strong> reschedule/cancel window (plan for 48h!). The standalone official practice exam was retired; the 12 guide sample questions are the only official practice.'
+      }
+    ];
+
+    // The 12 Official Sample Questions from Section 9 of the v1.0 CCAR-F Exam Guide PDF
+    const OFFICIAL_SAMPLE_QUESTIONS = [
+      {
+        stepId: 'official',
+        stepTitle: '★ Official Guide Sample Q1 (Scenario 1: Customer Support)',
+        stem: 'Production data shows that in 12% of cases, your agent skips `get_customer` entirely and calls `lookup_order` using only the customer\'s stated name, occasionally leading to misidentified accounts and incorrect refunds. What change would most effectively address this reliability issue?',
+        options: [
+          { letter: 'A', text: 'Add a programmatic prerequisite that blocks `lookup_order` and `process_refund` calls until `get_customer` has returned a verified customer ID.' },
+          { letter: 'B', text: 'Enhance the system prompt to state that customer verification via `get_customer` is mandatory before any order operations.' },
+          { letter: 'C', text: 'Add few-shot examples showing the agent always calling `get_customer` first, even when customers volunteer order details.' },
+          { letter: 'D', text: 'Implement a routing classifier that analyzes each request and enables only the subset of tools appropriate for that request type.' }
+        ],
+        answerLetter: 'A',
+        rationale: 'When a specific tool sequence is required for critical business logic (like verifying customer identity before processing refunds), programmatic enforcement provides deterministic guarantees that prompt-based approaches cannot. Options B and C rely on probabilistic LLM compliance. Option D addresses tool availability rather than tool ordering.'
+      },
+      {
+        stepId: 'official',
+        stepTitle: '★ Official Guide Sample Q2 (Scenario 1: Customer Support)',
+        stem: 'Production logs show the agent frequently calls `get_customer` when users ask about orders (e.g., "check my order #12345"), instead of calling `lookup_order`. Both tools have minimal descriptions ("Retrieves customer information" / "Retrieves order details") and accept similar identifier formats. What\'s the most effective first step to improve tool selection reliability?',
+        options: [
+          { letter: 'A', text: 'Add few-shot examples to the system prompt demonstrating correct tool selection patterns, with 5-8 examples showing order-related queries routing to `lookup_order`.' },
+          { letter: 'B', text: 'Expand each tool\'s description to include input formats it handles, example queries, edge cases, and boundaries explaining when to use it versus similar tools.' },
+          { letter: 'C', text: 'Implement a routing layer that parses user input before each turn and pre-selects the appropriate tool based on detected keywords and identifier patterns.' },
+          { letter: 'D', text: 'Consolidate both tools into a single `lookup_entity` tool that accepts any identifier and internally determines which backend to query.' }
+        ],
+        answerLetter: 'B',
+        rationale: 'Tool descriptions are the primary mechanism LLMs use for tool selection. When descriptions are minimal, models lack the context to differentiate between similar tools. Option B directly addresses this root cause with a low-effort, high-leverage fix before adding few-shot token overhead (A) or over-engineered routing (C).'
+      },
+      {
+        stepId: 'official',
+        stepTitle: '★ Official Guide Sample Q3 (Scenario 1: Customer Support)',
+        stem: 'Your agent achieves 55% first-contact resolution, well below the 80% target. Logs show it escalates straightforward cases (standard damage replacements with photo evidence) while attempting to autonomously handle complex situations requiring policy exceptions. What\'s the most effective way to improve escalation calibration?',
+        options: [
+          { letter: 'A', text: 'Add explicit escalation criteria to your system prompt with few-shot examples demonstrating when to escalate versus resolve autonomously.' },
+          { letter: 'B', text: 'Have the agent self-report a confidence score (1-10) before each response and automatically route requests to humans when confidence falls below a threshold.' },
+          { letter: 'C', text: 'Deploy a separate classifier model trained on historical tickets to predict which requests need escalation before the main agent begins processing.' },
+          { letter: 'D', text: 'Implement sentiment analysis to detect customer frustration levels and automatically escalate when negative sentiment exceeds a threshold.' }
+        ],
+        answerLetter: 'A',
+        rationale: 'Adding explicit escalation criteria with few-shot examples directly addresses unclear decision boundaries. Option B fails because LLM self-reported confidence is poorly calibrated. Option C is over-engineered before prompt optimization is tried. Option D fails because sentiment does not correlate with case complexity.'
+      },
+      {
+        stepId: 'official',
+        stepTitle: '★ Official Guide Sample Q4 (Scenario 2: Code Generation with Claude Code)',
+        stem: 'You want to create a custom `/review` slash command that runs your team\'s standard code review checklist. This command should be available to every developer when they clone or pull the repository. Where should you create this command file?',
+        options: [
+          { letter: 'A', text: 'In the `.claude/commands/` directory in the project repository' },
+          { letter: 'B', text: 'In `~/.claude/commands/` in each developer\'s home directory' },
+          { letter: 'C', text: 'In the `CLAUDE.md` file at the project root' },
+          { letter: 'D', text: 'In a `.claude/config.json` file with a commands array' }
+        ],
+        answerLetter: 'A',
+        rationale: 'Project-scoped custom slash commands are stored in `.claude/commands/` within the repository so they are version-controlled and shared. (Note: In Oct 2026 live docs, `.claude/skills/` is now preferred over `.claude/commands/`, but `.claude/commands/` remains the v1.0 exam answer).'
+      },
+      {
+        stepId: 'official',
+        stepTitle: '★ Official Guide Sample Q5 (Scenario 2: Code Generation with Claude Code)',
+        stem: 'You\'ve been assigned to restructure the team\'s monolithic application into microservices. This will involve changes across dozens of files and requires decisions about service boundaries and module dependencies. Which approach should you take?',
+        options: [
+          { letter: 'A', text: 'Enter plan mode to explore the codebase, understand dependencies, and design an implementation approach before making changes.' },
+          { letter: 'B', text: 'Start with direct execution and make changes incrementally, letting the implementation reveal the natural service boundaries.' },
+          { letter: 'C', text: 'Use direct execution with comprehensive upfront instructions detailing exactly how each service should be structured.' },
+          { letter: 'D', text: 'Begin in direct execution mode and only switch to plan mode if you encounter unexpected complexity during implementation.' }
+        ],
+        answerLetter: 'A',
+        rationale: 'Plan mode is designed for complex tasks involving large-scale changes, multiple valid approaches, and architectural decisions. It enables safe exploration and design before committing to changes.'
+      },
+      {
+        stepId: 'official',
+        stepTitle: '★ Official Guide Sample Q6 (Scenario 2: Code Generation with Claude Code)',
+        stem: 'Your codebase has distinct areas with different coding conventions: React components use functional style with hooks, API handlers use async/await with specific error handling, and database models follow a repository pattern. Test files are spread throughout the codebase alongside the code they test (e.g., `Button.test.tsx` next to `Button.tsx`), and you want all tests to follow the same conventions regardless of location. What\'s the most maintainable way to ensure Claude automatically applies the correct conventions when generating code?',
+        options: [
+          { letter: 'A', text: 'Create rule files in `.claude/rules/` with YAML frontmatter specifying glob patterns to conditionally apply conventions based on file paths' },
+          { letter: 'B', text: 'Consolidate all conventions in the root `CLAUDE.md` file under headers for each area, relying on Claude to infer which section applies' },
+          { letter: 'C', text: 'Create skills in `.claude/skills/` for each code type that include the relevant conventions in their `SKILL.md` files' },
+          { letter: 'D', text: 'Place a separate `CLAUDE.md` file in each subdirectory containing that area\'s specific conventions' }
+        ],
+        answerLetter: 'A',
+        rationale: '`.claude/rules/` with glob patterns (e.g., `**/*.test.tsx`) allows conventions to be automatically applied based on file paths regardless of directory location.'
+      },
+      {
+        stepId: 'official',
+        stepTitle: '★ Official Guide Sample Q7 (Scenario 3: Multi-Agent Research System)',
+        stem: 'After running the system on the topic "impact of AI on creative industries," you observe that each subagent completes successfully: the web search agent finds relevant articles, the document analysis agent summarizes papers correctly, and the synthesis agent produces coherent output. However, the final reports cover only visual arts, completely missing music, writing, and film production. When you examine the coordinator\'s logs, you see it decomposed the topic into three subtasks: "AI in digital art creation," "AI in graphic design," and "AI in photography." What is the most likely root cause?',
+        options: [
+          { letter: 'A', text: 'The synthesis agent lacks instructions for identifying coverage gaps in the findings it receives from other agents.' },
+          { letter: 'B', text: 'The coordinator agent\'s task decomposition is too narrow, resulting in subagent assignments that don\'t cover all relevant domains of the topic.' },
+          { letter: 'C', text: 'The web search agent\'s queries are not comprehensive enough and need to be expanded to cover more creative industry sectors.' },
+          { letter: 'D', text: 'The document analysis agent is filtering out sources related to non-visual creative industries due to overly restrictive relevance criteria.' }
+        ],
+        answerLetter: 'B',
+        rationale: 'The coordinator\'s logs reveal the root cause directly: it decomposed "creative industries" into only visual arts subtasks. The subagents executed their assigned tasks correctly—the problem is upstream in what they were assigned.'
+      },
+      {
+        stepId: 'official',
+        stepTitle: '★ Official Guide Sample Q8 (Scenario 3: Multi-Agent Research System)',
+        stem: 'The web search subagent times out while researching a complex topic. You need to design how this failure information flows back to the coordinator agent. Which error propagation approach best enables intelligent recovery?',
+        options: [
+          { letter: 'A', text: 'Return structured error context to the coordinator including the failure type, the attempted query, any partial results, and potential alternative approaches.' },
+          { letter: 'B', text: 'Implement automatic retry logic with exponential backoff within the subagent, returning a generic "search unavailable" status only after all retries are exhausted.' },
+          { letter: 'C', text: 'Catch the timeout within the subagent and return an empty result set marked as successful.' },
+          { letter: 'D', text: 'Propagate the timeout exception directly to a top-level handler that terminates the entire research workflow.' }
+        ],
+        answerLetter: 'A',
+        rationale: 'Structured error context gives the coordinator the information it needs to make intelligent recovery decisions—whether to retry with a modified query, try an alternative approach, or proceed with partial results.'
+      },
+      {
+        stepId: 'official',
+        stepTitle: '★ Official Guide Sample Q9 (Scenario 3: Multi-Agent Research System)',
+        stem: 'During testing, you observe that the synthesis agent frequently needs to verify specific claims while combining findings. Currently, when verification is needed, the synthesis agent returns control to the coordinator, which invokes the web search agent, then re-invokes synthesis with results. This adds 2-3 round trips per task and increases latency by 40%. Your evaluation shows that 85% of these verifications are simple fact-checks (dates, names, statistics) while 15% require deeper investigation. What\'s the most effective approach to reduce overhead while maintaining system reliability?',
+        options: [
+          { letter: 'A', text: 'Give the synthesis agent a scoped `verify_fact` tool for simple lookups, while complex verifications continue delegating to the web search agent through the coordinator.' },
+          { letter: 'B', text: 'Have the synthesis agent accumulate all verification needs and return them as a batch to the coordinator at the end of its pass, which then sends them all to the web search agent at once.' },
+          { letter: 'C', text: 'Give the synthesis agent access to all web search tools so it can handle any verification need directly without round-trips through the coordinator.' },
+          { letter: 'D', text: 'Have the web search agent proactively cache extra context around each source during initial research, anticipating what the synthesis agent might need to verify.' }
+        ],
+        answerLetter: 'A',
+        rationale: 'Option A applies the principle of least privilege by giving the synthesis agent only what it needs for the 85% common case while preserving coordinator delegation for complex cases.'
+      },
+      {
+        stepId: 'official',
+        stepTitle: '★ Official Guide Sample Q10 (Scenario 5: Claude Code for CI)',
+        stem: 'Your pipeline script runs `claude "Analyze this pull request for security issues"` but the job hangs indefinitely. Logs indicate Claude Code is waiting for interactive input. What\'s the correct approach to run Claude Code in an automated pipeline?',
+        options: [
+          { letter: 'A', text: 'Add the `-p` flag: `claude -p "Analyze this pull request for security issues"`' },
+          { letter: 'B', text: 'Set the environment variable `CLAUDE_HEADLESS=true` before running the command' },
+          { letter: 'C', text: 'Redirect stdin from `/dev/null`: `claude "Analyze this pull request for security issues" < /dev/null`' },
+          { letter: 'D', text: 'Add the `--batch` flag: `claude --batch "Analyze this pull request for security issues"`' }
+        ],
+        answerLetter: 'A',
+        rationale: 'The `-p` (or `--print`) flag is the documented way to run Claude Code in non-interactive mode. Options B and D are fictional flags/env vars.'
+      },
+      {
+        stepId: 'official',
+        stepTitle: '★ Official Guide Sample Q11 (Scenario 5: Claude Code for CI)',
+        stem: 'Your team wants to reduce API costs for automated analysis. Currently, real-time Claude calls power two workflows: (1) a blocking pre-merge check that must complete before developers can merge, and (2) a technical debt report generated overnight for review the next morning. Your manager proposes switching both to the Message Batches API for its 50% cost savings. How should you evaluate this proposal?',
+        options: [
+          { letter: 'A', text: 'Use batch processing for the technical debt reports only; keep real-time calls for pre-merge checks.' },
+          { letter: 'B', text: 'Switch both workflows to batch processing with status polling to check for completion.' },
+          { letter: 'C', text: 'Keep real-time calls for both workflows to avoid batch result ordering issues.' },
+          { letter: 'D', text: 'Switch both to batch processing with a timeout fallback to real-time if batches take too long.' }
+        ],
+        answerLetter: 'A',
+        rationale: 'The Message Batches API offers 50% cost savings but has processing times up to 24 hours with no guaranteed latency SLA, making it unsuitable for blocking pre-merge checks.'
+      },
+      {
+        stepId: 'official',
+        stepTitle: '★ Official Guide Sample Q12 (Scenario 5: Claude Code for CI)',
+        stem: 'A pull request modifies 14 files across the stock tracking module. Your single-pass review analyzing all files together produces inconsistent results: detailed feedback for some files but superficial comments for others, obvious bugs missed, and contradictory feedback—flagging a pattern as problematic in one file while approving identical code elsewhere in the same PR. How should you restructure the review?',
+        options: [
+          { letter: 'A', text: 'Split into focused passes: analyze each file individually for local issues, then run a separate integration-focused pass examining cross-file data flow.' },
+          { letter: 'B', text: 'Require developers to split large PRs into smaller submissions of 3-4 files before the automated review runs.' },
+          { letter: 'C', text: 'Switch to a higher-tier model with a larger context window to give all 14 files adequate attention in one pass.' },
+          { letter: 'D', text: 'Run three independent review passes on the full PR and only flag issues that appear in at least two of the three runs.' }
+        ],
+        answerLetter: 'A',
+        rationale: 'Splitting reviews into focused passes directly addresses attention dilution when processing many files at once. Notice Option C is the classic "bigger model/context window" distractor trap!'
+      }
+    ];
+
+    // 8 New Oct 2026 Drift & Policy Calibration Questions
+    const DRIFT_QUESTIONS = [
+      {
+        stepId: 'drift',
+        stepTitle: '⚡ Oct 2026 Drift Check #1 (Subagent Tool Name)',
+        stem: 'You know from recent Claude Code v2.1.63+ release notes that the subagent spawning tool was renamed to `Agent`. On the CCAR-F exam, a question asks which entry must be included in a coordinator agent\'s `allowedTools` list so it can spawn subagents. Which answer should you pick?',
+        options: [
+          { letter: 'A', text: '`"Task"` — because CCAR-F is graded against the v1.0 Exam Guide (Task Statement 1.3)' },
+          { letter: 'B', text: '`"SpawnSubagent"`' },
+          { letter: 'C', text: '`"Coordinator"`' },
+          { letter: 'D', text: 'Subagents do not require any tool entry in `allowedTools`' }
+        ],
+        answerLetter: 'A',
+        rationale: 'Task Statement 1.3 in the v1.0 Exam Guide explicitly tests: "The Task tool as the mechanism for spawning subagents, and the requirement that allowedTools must include \'Task\'." In live Claude Code v2.1.63+, `Agent` is the new name and `Task` is an alias.'
+      },
+      {
+        stepId: 'drift',
+        stepTitle: '⚡ Oct 2026 Drift Check #2 (SKILL.md allowed-tools)',
+        stem: 'How does the v1.0 CCAR-F Exam Guide (Task Statement 3.2) define `allowed-tools` in `SKILL.md` frontmatter, versus what current Claude Code docs say?',
+        options: [
+          { letter: 'A', text: 'Both say `allowed-tools` is only used for MCP servers' },
+          { letter: 'B', text: 'The v1.0 Exam Guide tests `allowed-tools` as restricting a skill\'s tool access (to prevent destructive actions); current live docs define `allowed-tools` as pre-approving tools without permission prompts and `disallowed-tools` as removing tools' },
+          { letter: 'C', text: 'The v1.0 Exam Guide says `allowed-tools` is deprecated' },
+          { letter: 'D', text: 'Current live docs removed `SKILL.md` frontmatter entirely' }
+        ],
+        answerLetter: 'B',
+        rationale: 'On the exam, if asked how to restrict a skill to read/write-only tools to prevent destructive actions, select `allowed-tools` in `SKILL.md` frontmatter. In real-world Claude Code today, use `disallowed-tools` to block tools and `allowed-tools` to bypass permission prompts.'
+      },
+      {
+        stepId: 'drift',
+        stepTitle: '⚡ Oct 2026 Drift Check #3 (Forced tool_choice vs 5.x Models)',
+        stem: 'On the CCAR-F exam, you have three extraction schemas (`extract_invoice`, `extract_receipt`, `extract_contract`) and want to guarantee the model calls one of them without returning conversational text. What is the v1.0 Exam Guide answer, and what changed in Sept 2026 on Claude 5.x models?',
+        options: [
+          { letter: 'A', text: 'Exam answer: `tool_choice: "any"`. (Live 5.x models reject forced `tool_choice` with a 400 error and use `auto` + `strict: true` or `output_config.format` instead.)' },
+          { letter: 'B', text: 'Exam answer: `tool_choice: "auto"` with a stricter system prompt.' },
+          { letter: 'C', text: 'Exam answer: `tool_choice: "none"`.' },
+          { letter: 'D', text: 'Exam answer: Set temperature to 0.' }
+        ],
+        answerLetter: 'A',
+        rationale: 'Task Statement 4.3 explicitly tests setting `tool_choice: "any"` when multiple schemas exist and `{"type": "tool", "name": "..."}` to force a specific tool first. Always pick the `tool_choice` answer on the exam, even though Opus 5.5 / Sonnet 5.5 / Fable 5.1 return 400 on forced `tool_choice` in live API calls.'
+      },
+      {
+        stepId: 'drift',
+        stepTitle: '⚡ Oct 2026 Drift Check #4 (Memory Inspection & Imports)',
+        stem: 'A developer is debugging why conventions in a modular `CLAUDE.md` setup aren\'t being applied as expected across sessions. According to the v1.0 Exam Guide (Task Statement 3.1), which command verifies which memory files are loaded (and what is its newer companion in current docs)?',
+        options: [
+          { letter: 'A', text: '`/memory` on the exam (and `/context` under "Memory files" in current live docs)' },
+          { letter: 'B', text: '`/debug-claude-md`' },
+          { letter: 'C', text: '`/inspect-rules`' },
+          { letter: 'D', text: '`claude --list-memory`' }
+        ],
+        answerLetter: 'A',
+        rationale: 'Task Statement 3.1 tests `/memory` to verify which memory files are loaded, and `@import` to include modular standards files. In current live docs, the syntax is `@path/to/file` and `/context` also shows loaded memory files.'
+      },
+      {
+        stepId: 'drift',
+        stepTitle: '⚡ Oct 2026 Policy Check #5 (Reschedule Window Conflict)',
+        stem: 'You need to reschedule your Pearson VUE CCAR-F exam appointment without forfeiting your $125 exam fee. The v1.0 PDF mentions 24 hours, while Pearson VUE and the official Certification FAQ specify a longer window. What window should you plan around?',
+        options: [
+          { letter: 'A', text: 'At least 48 hours before your appointment' },
+          { letter: 'B', text: '2 hours before your appointment' },
+          { letter: 'C', text: '14 days before your appointment' },
+          { letter: 'D', text: 'Rescheduling is never allowed once booked' }
+        ],
+        answerLetter: 'A',
+        rationale: 'Pearson VUE and the official Anthropic Certification FAQ state 48 hours, which is stricter than the 24 hours printed in Section 11 of the v1.0 PDF. Plan around 48 hours so you don\'t forfeit your fee.'
+      },
+      {
+        stepId: 'drift',
+        stepTitle: '⚡ Oct 2026 Program Check #6 (Dec 7, 2026 Refresh)',
+        stem: 'Pearson VUE announced an exam content refresh taking effect December 7, 2026 (with updated guides publishing November 17, 2026). How does this affect CCAR-F (Claude Certified Architect – Foundations)?',
+        options: [
+          { letter: 'A', text: 'CCAR-F is NOT listed among the three refreshing exams (CCAO-F, CCDV-F, CCAR-P), so its v1.0 July 2026 blueprint remains current—though you should still verify on Nov 17 or test before Dec 7.' },
+          { letter: 'B', text: 'CCAR-F is being retired permanently on November 17, 2026.' },
+          { letter: 'C', text: 'CCAR-F automatically upgrades to Architect – Professional (CCAR-P) on December 7.' },
+          { letter: 'D', text: 'You must pass Associate (CCAO-F) and Developer (CCDV-F) before registering for CCAR-F.' }
+        ],
+        answerLetter: 'A',
+        rationale: 'The Dec 7, 2026 refresh notice lists Associate (CCAO-F), Developer (CCDV-F), and Architect – Professional (CCAR-P), not CCAR-F. Also remember: there are no formal prerequisites between the four certifications, and Foundations does not auto-upgrade to Professional.'
+      },
+      {
+        stepId: 'drift',
+        stepTitle: '⚡ Oct 2026 Trap Check #7 ("Switch to a Stronger Model")',
+        stem: 'Across multiple community exam reports and the official sample questions, an option proposes "Switch to a higher-tier model (e.g., Opus) or larger context window" to fix inconsistent multi-file reviews, tool misrouting, or missing fields. When is "bigger model / larger context window" the right answer on CCAR-F?',
+        options: [
+          { letter: 'A', text: 'Almost never—it is a classic exam distractor when the real issue is attention dilution, ambiguous tool descriptions, or missing source data (it only applies if a question is strictly about raw token capacity).' },
+          { letter: 'B', text: 'Whenever a single-pass review touches more than 10 files.' },
+          { letter: 'C', text: 'Whenever two MCP tools have overlapping descriptions.' },
+          { letter: 'D', text: 'Whenever a subagent omits music and film from a creative-industries report.' }
+        ],
+        answerLetter: 'A',
+        rationale: 'As Official Sample Q12 and community reports confirm, "switch to a higher-tier model with a larger context window" is a go-to distractor. The exam rewards architectural and structural fixes (multi-pass decomposition, better tool descriptions, hooks, nullable schema fields).'
+      },
+      {
+        stepId: 'drift',
+        stepTitle: '⚡ Oct 2026 Out-of-Scope Check #8 (New Platform Features)',
+        stem: 'Which of the following topics is explicitly IN SCOPE on the CCAR-F v1.0 blueprint (as opposed to out-of-scope platform features)?',
+        options: [
+          { letter: 'A', text: 'Stratified random sampling of high-confidence extractions and field-level confidence calibration using labeled validation sets' },
+          { letter: 'B', text: 'Prompt caching implementation internals and cache diagnostics API' },
+          { letter: 'C', text: 'Deploying and container-orchestrating MCP servers on AWS/GCP with OAuth key rotation' },
+          { letter: 'D', text: 'Computer use browser automation and vision/image analysis' }
+        ],
+        answerLetter: 'A',
+        rationale: 'Task Statement 5.5 explicitly tests stratified random sampling of high-confidence extractions and field-level confidence calibration. Options B, C, and D are all listed verbatim under "Out-of-Scope Topics" in Appendix §17 of the Exam Guide.'
+      }
+    ];
+
+    const SCOPE_SORTER_ITEMS = [
+      { topic: 'Agentic loop control flow using stop_reason ("tool_use" vs "end_turn")', inScope: true, note: 'In-Scope (Domain 1.1) — core exam topic.' },
+      { topic: 'Prompt caching implementation details & cache diagnostics internals', inScope: false, note: 'Out-of-Scope (Appendix §17) — "Prompt caching implementation details (beyond knowing it exists)" is explicitly excluded.' },
+      { topic: 'Pre-call tool interception hooks blocking refunds > $500', inScope: true, note: 'In-Scope (Domain 1.4–1.5) — signature exam pattern ("deterministic beats probabilistic").' },
+      { topic: 'Deploying & hosting MCP servers (Docker, networking, container orchestration)', inScope: false, note: 'Out-of-Scope (Appendix §17) — MCP server infra/hosting is explicitly excluded; only .mcp.json / ~/.claude.json config & tool/resource design are tested.' },
+      { topic: 'MCP Resources vs. MCP Tools (content catalogs vs. state-changing actions)', inScope: true, note: 'In-Scope (Domain 2.4) — tested whenever an agent wastes tool calls discovering static catalogs.' },
+      { topic: 'Computer Use (browser automation, desktop interaction) & Vision analysis', inScope: false, note: 'Out-of-Scope (Appendix §17) — explicitly excluded from CCAR-F.' },
+      { topic: '.claude/rules/*.md with YAML frontmatter glob paths (e.g., paths: ["**/*.test.tsx"])', inScope: true, note: 'In-Scope (Domain 3.3 & Official Sample Q6) — high-frequency exam topic.' },
+      { topic: 'Streaming API implementation (Server-Sent Events) & rate-limit pricing math', inScope: false, note: 'Out-of-Scope (Appendix §17) — streaming and pricing calculations are excluded.' },
+      { topic: 'Stratified random sampling of high-confidence extractions to detect novel errors', inScope: true, note: 'In-Scope (Domain 5.5) — tested under human review & confidence calibration.' },
+      { topic: 'Fine-tuning custom models, RLHF, & Constitutional AI training methodology', inScope: false, note: 'Out-of-Scope (Appendix §17) — model training and internals are never tested.' },
+      { topic: 'Embedding models & vector database implementation details', inScope: false, note: 'Out-of-Scope (Appendix §17) — explicitly excluded.' },
+      { topic: 'Splitting multi-file PR reviews into per-file local passes + cross-file integration pass', inScope: true, note: 'In-Scope (Domain 1.6 / 4.6 & Official Sample Q12) — key fix for attention dilution.' },
+      { topic: 'OAuth protocol details, API key rotation, and AWS/GCP/Azure provider configs', inScope: false, note: 'Out-of-Scope (Appendix §17) — cloud provider and auth protocol specifics are excluded.' },
+      { topic: 'Validation-retry loops (when retry works on format errors vs. fails on absent source data)', inScope: true, note: 'In-Scope (Domain 4.4) — critical distinction between retryable format errors and nullable schema fixes.' }
+    ];
+
+    const OFFICIAL_EXERCISES = [
+      {
+        id: 'ex1',
+        title: 'Exercise 1: Multi-Tool Agent with Escalation Logic (Domains 1, 2, 5)',
+        steps: [
+          'Define 3–4 MCP tools with detailed descriptions & boundary conditions (include 2 similar tools to test disambiguation).',
+          'Implement an agentic loop checking stop_reason ("tool_use" vs "end_turn") and appending tool_result blocks.',
+          'Add structured error responses: errorCategory (transient/validation/permission), isRetryable boolean, and description.',
+          'Implement a programmatic pre-tool hook intercepting operations above a threshold (e.g., >$500 refund) and redirecting to escalation.',
+          'Test with multi-concern customer messages: decompose, investigate in parallel, and synthesize a unified response.'
+        ]
+      },
+      {
+        id: 'ex2',
+        title: 'Exercise 2: Configure Claude Code for Team Workflow (Domains 2, 3)',
+        steps: [
+          'Create a project-level CLAUDE.md with shared coding/testing standards.',
+          'Create .claude/rules/*.md files with YAML frontmatter glob patterns (paths: ["src/api/**/*"], paths: ["**/*.test.*"]).',
+          'Create a project-scoped skill in .claude/skills/ with context: fork and allowed-tools.',
+          'Configure a shared MCP server in .mcp.json using ${ENV_VAR} expansion + a personal server in ~/.claude.json.',
+          'Compare Plan Mode vs. Direct Execution on a single-file fix vs. a multi-file migration.'
+        ]
+      },
+      {
+        id: 'ex3',
+        title: 'Exercise 3: Structured Data Extraction Pipeline (Domains 4, 5)',
+        steps: [
+          'Define an extraction tool JSON schema with required/optional fields, nullable fields, and enum + "other" + detail string.',
+          'Implement a validation-retry loop passing (original doc + failed JSON + specific error); verify retries don\'t fix absent source data.',
+          'Add 2–4 few-shot examples demonstrating extraction from varied document structures.',
+          'Design a Message Batches API strategy (custom_id correlation, 24h SLA calculation, chunking failed oversized docs).',
+          'Add field-level confidence scores, route low-confidence items to human review, and segment accuracy by doc type/field.'
+        ]
+      },
+      {
+        id: 'ex4',
+        title: 'Exercise 4: Multi-Agent Research Pipeline (Domains 1, 2, 5)',
+        steps: [
+          'Build a coordinator agent (allowedTools includes "Task") delegating to search & analysis subagents with explicit context passing.',
+          'Emit multiple Task tool calls in a single coordinator turn for parallel subagent execution.',
+          'Require subagents to output structured claim-source mappings (claim, excerpt, URL/doc, publication date) preserved in synthesis.',
+          'Simulate a subagent timeout returning structured error context (failure type, query, partial results) so coordinator annotates gaps.'
+        ]
+      }
+    ];
+
+    const STORAGE_KEY = 'ccaf_study_progress_v2';
+    let state = {
+      currentStepIdx: 0,
+      completedSteps: {},
+      checkedExerciseTasks: {},
+      blindTables: false,
+      docsCache: {},
+      flashcards: [],
+      fcFiltered: [],
+      fcIndex: 0,
+      practiceQuestions: [],
+      scopeIdx: 0,
+      scopeRight: 0,
+      scopeTotal: 0,
+      paceTimerId: null,
+      paceSeconds: 0
+    };
+
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || localStorage.getItem('ccaf_study_progress_v1') || '{}');
+      if (saved.completedSteps) state.completedSteps = saved.completedSteps;
+      if (saved.checkedExerciseTasks) state.checkedExerciseTasks = saved.checkedExerciseTasks;
+      if (typeof saved.currentStepIdx === 'number' && saved.currentStepIdx < STEPS.length) {
+        state.currentStepIdx = saved.currentStepIdx;
+      }
+    } catch (e) {}
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        completedSteps: state.completedSteps,
+        checkedExerciseTasks: state.checkedExerciseTasks,
+        currentStepIdx: state.currentStepIdx
+      }));
+      updateProgressUI();
+    }
+
+    function updateProgressUI() {
+      const doneCount = STEPS.filter(s => state.completedSteps[s.id]).length;
+      document.getElementById('overallProgressText').textContent = `${doneCount} / ${STEPS.length} steps`;
+      document.getElementById('overallProgressBar').style.width = `${Math.round((doneCount / STEPS.length) * 100)}%`;
+      renderSidebar();
+    }
+
+    function renderSidebar() {
+      const list = document.getElementById('stepList');
+      list.innerHTML = '';
+      STEPS.forEach((step, idx) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        const isDone = !!state.completedSteps[step.id];
+        btn.className = `step-btn ${idx === state.currentStepIdx ? 'active' : ''} ${isDone ? 'done' : ''}`;
+        btn.innerHTML = `
+          <span class="step-check">${isDone ? '✓' : idx}</span>
+          <span>${step.title.replace(/^\d+\.\s*/, '')}</span>
+          <span class="step-weight ${step.hot ? 'hot' : ''}">${step.weight}</span>
+        `;
+        btn.addEventListener('click', () => loadStep(idx));
+        list.appendChild(btn);
+      });
+    }
+
+    function formatInline(text) {
+      return text
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/\\\[(\d+)\\\]/g, '<span class="cite-ref" title="Source [$1]">[$1]</span>')
+        .replace(/&lt;(https?:\/\/[^&]+)&gt;/g, '<a href="$1" target="_blank" rel="noopener">$1</a>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (m, label, url) => {
+          const cleanFile = url.split('#')[0].split('/').pop();
+          const stepIdx = STEPS.findIndex(s => cleanFile && s.file.endsWith('/' + cleanFile));
+          if (stepIdx !== -1) {
+            return `<a href="#" data-goto-step="${stepIdx}">${label}</a>`;
+          }
+          if (url === '.') {
+            return `<a href="#" data-goto-step="3">${label}</a>`;
+          }
+          if (url.includes('mock-exam/')) {
+            return `<a href="#" data-goto-mode="exams">${label}</a>`;
+          }
+          let resolvedUrl = url;
+          if (!/^(https?:|mailto:|\/|#)/.test(url)) {
+            resolvedUrl = url.startsWith('../') ? url.replace(/^\.\.\//, '') : `study-guide/${url}`;
+          }
+          return `<a href="${resolvedUrl}" target="_blank" rel="noopener">${label}</a>`;
+        });
+    }
+
+    function parsePracticeBlock(lines, startIdx, stepId) {
+      const stem = lines[startIdx].replace(/^\*\*Practice\.\*\*\s*/, '').trim();
+      let i = startIdx + 1;
+      const options = [];
+      let answerLetter = '';
+      let rationale = '';
+
+      while (i < lines.length) {
+        const line = lines[i].trim();
+        if (!line) { i++; continue; }
+        const optMatch = line.match(/^([A-D])\)\s+(.*)$/);
+        if (optMatch) {
+          options.push({ letter: optMatch[1], text: optMatch[2] });
+          i++;
+          continue;
+        }
+        const ansMatch = line.match(/^\*\*Answer:\s*([A-D])\.\*\*\s*(.*)$/);
+        if (ansMatch) {
+          answerLetter = ansMatch[1];
+          rationale = ansMatch[2] || 'Correct!';
+          i++;
+          break;
+        }
+        break;
+      }
+
+      if (options.length && answerLetter) {
+        return {
+          nextIdx: i,
+          question: { stepId, stem, options, answerLetter, rationale }
+        };
+      }
+      return null;
+    }
+
+    function createPracticeCardEl(q, qNum) {
+      const card = document.createElement('div');
+      const isOfficial = q.stepId === 'official';
+      card.className = `practice-card ${isOfficial ? 'official-sample' : ''}`;
+      const badgeLabel = q.stepTitle || `Interactive Check ${qNum ? '#' + qNum : ''}`;
+      card.innerHTML = `
+        <div class="practice-header">
+          <span class="practice-badge ${isOfficial ? 'official' : ''}">${badgeLabel}</span>
+        </div>
+        <div class="practice-stem">${formatInline(q.stem)}</div>
+        <div class="practice-options"></div>
+        <div class="practice-rationale" hidden></div>
+      `;
+      const optsWrap = card.querySelector('.practice-options');
+      const ratEl = card.querySelector('.practice-rationale');
+
+      q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'practice-opt';
+        btn.innerHTML = `<strong>${opt.letter})</strong> <span>${formatInline(opt.text)}</span>`;
+        btn.addEventListener('click', () => {
+          optsWrap.querySelectorAll('.practice-opt').forEach(b => {
+            b.classList.remove('correct', 'wrong');
+          });
+          if (opt.letter === q.answerLetter) {
+            btn.classList.add('correct');
+          } else {
+            btn.classList.add('wrong');
+            const rightBtn = optsWrap.children[q.options.findIndex(o => o.letter === q.answerLetter)];
+            if (rightBtn) rightBtn.classList.add('correct');
+          }
+          ratEl.hidden = false;
+          ratEl.innerHTML = `<strong>Correct Answer: ${q.answerLetter}.</strong> ${formatInline(q.rationale)}`;
+        });
+        optsWrap.appendChild(btn);
+      });
+      return card;
+    }
+
+    function renderStepDriftBanner(stepId) {
+      const holder = document.getElementById('stepDriftCallout');
+      holder.innerHTML = '';
+      const relevant = DRIFT_ITEMS.filter(d => d.stepId === stepId);
+      if (!relevant.length) return;
+
+      const banner = document.createElement('div');
+      banner.className = 'drift-banner';
+      banner.innerHTML = `
+        <div class="drift-banner-title">
+          <span>⚡ Oct 2026 Exam-vs-Live-Docs Drift Alert for This Section (${relevant.length})</span>
+          <button type="button" class="btn" style="padding:0.15rem 0.55rem; font-size:0.74rem;" data-open-drift-tab>Open Full Drift Lab &rarr;</button>
+        </div>
+        <div style="font-size:0.83rem; color:var(--text-muted); margin-bottom:0.4rem;">
+          The exam scores against the <strong>July 2026 v1.0 Guide</strong>. Know both so new live-doc terminology doesn't trip you up:
+        </div>
+      `;
+
+      relevant.forEach(item => {
+        const row = document.createElement('div');
+        row.style.marginTop = '0.6rem';
+        row.innerHTML = `
+          <div style="font-weight:700; font-size:0.86rem; margin-bottom:0.25rem;">• ${item.topic}</div>
+          <div class="drift-grid">
+            <div class="drift-box"><strong class="exam-tag">✅ Pick on Exam (v1.0 Guide)</strong>${item.examAnswer}</div>
+            <div class="drift-box"><strong class="live-tag">📘 Current Live Docs (Oct 2026)</strong>${item.liveDocs}</div>
+          </div>
+        `;
+        banner.appendChild(row);
+      });
+
+      banner.querySelector('[data-open-drift-tab]').addEventListener('click', () => {
+        document.querySelector('.tab-btn[data-mode="drift"]').click();
+      });
+
+      holder.appendChild(banner);
+    }
+
+    function renderMarkdown(md, stepId) {
+      const container = document.createElement('div');
+      const lines = md.split('\n');
+      let i = 0;
+
+      while (i < lines.length) {
+        const line = lines[i];
+
+        // Code block
+        if (line.trim().startsWith('```')) {
+          const codeLines = [];
+          i++;
+          while (i < lines.length && !lines[i].trim().startsWith('```')) {
+            codeLines.push(lines[i]);
+            i++;
+          }
+          i++;
+          const pre = document.createElement('pre');
+          const code = document.createElement('code');
+          code.textContent = codeLines.join('\n');
+          pre.appendChild(code);
+          container.appendChild(pre);
+          continue;
+        }
+
+        // Practice question block
+        if (line.trim().startsWith('**Practice.**')) {
+          const parsed = parsePracticeBlock(lines, i, stepId);
+          if (parsed) {
+            container.appendChild(createPracticeCardEl(parsed.question));
+            i = parsed.nextIdx;
+            continue;
+          }
+        }
+
+        // Table block (including indented tables in research MD)
+        if (line.trim().startsWith('|') && i + 1 < lines.length && lines[i + 1].includes('---')) {
+          const headers = line.trim().split('|').slice(1, -1).map(c => c.trim());
+          i += 2;
+          const rows = [];
+          while (i < lines.length && lines[i].trim().startsWith('|')) {
+            rows.push(lines[i].trim().split('|').slice(1, -1).map(c => c.trim()));
+            i++;
+          }
+          const wrap = document.createElement('div');
+          wrap.className = 'table-wrap';
+          const lastColHeader = headers[headers.length - 1] || 'Answer Column';
+          wrap.innerHTML = `
+            <div class="table-toolbar">
+              <span>Interactive Table (${rows.length} rows)</span>
+              <button type="button" class="btn" style="padding:0.2rem 0.6rem; font-size:0.75rem;" data-toggle-table>
+                Quiz Mode: Hide "${lastColHeader}"
+              </button>
+            </div>
+            <table class="study-table">
+              <thead><tr>${headers.map(h => `<th>${formatInline(h)}</th>`).join('')}</tr></thead>
+              <tbody></tbody>
+            </table>
+          `;
+          const tbody = wrap.querySelector('tbody');
+          rows.forEach(r => {
+            const tr = document.createElement('tr');
+            r.forEach((cell, cIdx) => {
+              const td = document.createElement('td');
+              const isLast = cIdx === r.length - 1;
+              if (isLast && state.blindTables) td.classList.add('blinded');
+              td.innerHTML = `<div class="cell-inner">${formatInline(cell)}</div>`;
+              if (isLast) {
+                td.dataset.blindable = '1';
+                td.addEventListener('click', () => {
+                  if (td.classList.contains('blinded')) td.classList.toggle('revealed');
+                });
+              }
+              tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+          });
+
+          wrap.querySelector('[data-toggle-table]').addEventListener('click', () => {
+            const cells = wrap.querySelectorAll('td[data-blindable="1"]');
+            const anyBlinded = Array.from(cells).some(c => c.classList.contains('blinded'));
+            cells.forEach(c => {
+              c.classList.toggle('blinded', !anyBlinded);
+              c.classList.remove('revealed');
+            });
+          });
+
+          container.appendChild(wrap);
+          continue;
+        }
+
+        // Headings
+        const hMatch = line.match(/^(#{1,3})\s+(.*)$/);
+        if (hMatch) {
+          const level = hMatch[1].length;
+          const el = document.createElement(`h${level}`);
+          el.innerHTML = `<span>${formatInline(hMatch[2])}</span>`;
+          container.appendChild(el);
+          i++;
+          continue;
+        }
+
+        // Blockquote (multi-line aware)
+        if (line.trim().startsWith('>')) {
+          const bqLines = [];
+          while (i < lines.length && lines[i].trim().startsWith('>')) {
+            bqLines.push(lines[i].trim().replace(/^>\s?/, ''));
+            i++;
+          }
+          const bq = document.createElement('blockquote');
+          bq.innerHTML = bqLines.filter(Boolean).map(l => `<div>${formatInline(l)}</div>`).join('');
+          container.appendChild(bq);
+          continue;
+        }
+
+        // Unordered or ordered list
+        if (line.match(/^\s*([-*]|\d+\.)\s+/)) {
+          const isOrdered = /^\s*\d+\./.test(line);
+          const listEl = document.createElement(isOrdered ? 'ol' : 'ul');
+          while (i < lines.length && lines[i].match(/^\s*([-*]|\d+\.)\s+/)) {
+            const li = document.createElement('li');
+            li.innerHTML = formatInline(lines[i].replace(/^\s*([-*]|\d+\.)\s+/, ''));
+            listEl.appendChild(li);
+            i++;
+          }
+          container.appendChild(listEl);
+          continue;
+        }
+
+        // Paragraph
+        if (line.trim()) {
+          const p = document.createElement('p');
+          p.innerHTML = formatInline(line);
+          container.appendChild(p);
+        }
+        i++;
+      }
+
+      container.querySelectorAll('[data-goto-step]').forEach(a => {
+        a.addEventListener('click', e => {
+          e.preventDefault();
+          loadStep(Number(a.dataset.gotoStep));
+        });
+      });
+
+      container.querySelectorAll('[data-goto-mode]').forEach(a => {
+        a.addEventListener('click', e => {
+          e.preventDefault();
+          const btn = document.querySelector(`.tab-btn[data-mode="${a.dataset.gotoMode}"]`);
+          if (btn) btn.click();
+        });
+      });
+
+      return container;
+    }
+
+    async function fetchDoc(step) {
+      if (state.docsCache[step.id]) return state.docsCache[step.id];
+      const res = await fetch(encodeURI(step.file));
+      const text = await res.text();
+      state.docsCache[step.id] = text;
+      return text;
+    }
+
+    async function loadStep(idx) {
+      state.currentStepIdx = idx;
+      saveState();
+      const step = STEPS[idx];
+      document.getElementById('currentStepLabel').textContent = `${step.title} (${step.weight})`;
+      const doneBtn = document.getElementById('markStepDoneBtn');
+      const isDone = !!state.completedSteps[step.id];
+      doneBtn.textContent = isDone ? '✓ Completed (Click to Undo)' : 'Mark Step Complete';
+      doneBtn.className = isDone ? 'btn btn-success' : 'btn btn-primary';
+
+      document.getElementById('prevStepBtn').disabled = idx === 0;
+      document.getElementById('nextStepBtn').disabled = idx === STEPS.length - 1;
+
+      renderStepDriftBanner(step.id);
+
+      const md = await fetchDoc(step);
+      const container = document.getElementById('mdContainer');
+      container.innerHTML = '';
+      container.appendChild(renderMarkdown(md, step.id));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function initDriftLab() {
+      // 1. Render Drift Trainer Table
+      const tbody = document.getElementById('driftTrainerBody');
+      tbody.innerHTML = '';
+      DRIFT_ITEMS.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${item.topic}</strong></td>
+          <td data-col="exam"><div class="cell-inner">${item.examAnswer}</div></td>
+          <td data-col="live"><div class="cell-inner">${item.liveDocs}</div></td>
+        `;
+        tr.querySelectorAll('td[data-col]').forEach(td => {
+          td.addEventListener('click', () => {
+            if (td.classList.contains('blinded')) td.classList.toggle('revealed');
+          });
+        });
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('blindExamColBtn').addEventListener('click', () => {
+        const cells = tbody.querySelectorAll('td[data-col="exam"]');
+        const anyBlinded = Array.from(cells).some(c => c.classList.contains('blinded'));
+        cells.forEach(c => { c.classList.toggle('blinded', !anyBlinded); c.classList.remove('revealed'); });
+      });
+
+      document.getElementById('blindLiveColBtn').addEventListener('click', () => {
+        const cells = tbody.querySelectorAll('td[data-col="live"]');
+        const anyBlinded = Array.from(cells).some(c => c.classList.contains('blinded'));
+        cells.forEach(c => { c.classList.toggle('blinded', !anyBlinded); c.classList.remove('revealed'); });
+      });
+
+      // 2. Render Scope Sorter
+      renderScopeItem();
+      document.getElementById('btnInScope').addEventListener('click', () => answerScope(true));
+      document.getElementById('btnOutScope').addEventListener('click', () => answerScope(false));
+      document.getElementById('nextScopeBtn').addEventListener('click', () => {
+        state.scopeIdx = (state.scopeIdx + 1) % SCOPE_SORTER_ITEMS.length;
+        renderScopeItem();
+      });
+
+      // 3. Render Official Section 8 Hands-On Exercises Checklist
+      renderExercisesChecklist();
+    }
+
+    function renderScopeItem() {
+      const item = SCOPE_SORTER_ITEMS[state.scopeIdx];
+      document.getElementById('scopeProgress').textContent = `Item ${state.scopeIdx + 1} of ${SCOPE_SORTER_ITEMS.length}`;
+      document.getElementById('scopePromptText').textContent = item.topic;
+      const fb = document.getElementById('scopeFeedback');
+      fb.hidden = true;
+    }
+
+    function answerScope(pickedInScope) {
+      const item = SCOPE_SORTER_ITEMS[state.scopeIdx];
+      const fb = document.getElementById('scopeFeedback');
+      const isRight = pickedInScope === item.inScope;
+      if (fb.hidden) {
+        state.scopeTotal++;
+        if (isRight) state.scopeRight++;
+        document.getElementById('scopeScoreBadge').textContent = `Score: ${state.scopeRight} / ${state.scopeTotal}`;
+      }
+      fb.hidden = false;
+      fb.style.borderLeftColor = isRight ? 'var(--correct)' : 'var(--incorrect)';
+      fb.innerHTML = `<strong>${isRight ? '✅ Correct!' : '❌ Watch Out!'}</strong> ${item.note}`;
+    }
+
+    function renderExercisesChecklist() {
+      const grid = document.getElementById('exercisesGrid');
+      grid.innerHTML = '';
+      let totalTasks = 0;
+      let checkedCount = 0;
+
+      OFFICIAL_EXERCISES.forEach(ex => {
+        const card = document.createElement('div');
+        card.className = 'exercise-card';
+        card.innerHTML = `<h3>${ex.title}</h3>`;
+        ex.steps.forEach((sText, sIdx) => {
+          totalTasks++;
+          const key = `${ex.id}_${sIdx}`;
+          const isChecked = !!state.checkedExerciseTasks[key];
+          if (isChecked) checkedCount++;
+          const label = document.createElement('label');
+          label.className = `check-item ${isChecked ? 'checked' : ''}`;
+          label.innerHTML = `
+            <input type="checkbox" ${isChecked ? 'checked' : ''}>
+            <span>${sText}</span>
+          `;
+          label.querySelector('input').addEventListener('change', e => {
+            state.checkedExerciseTasks[key] = e.target.checked;
+            saveState();
+            renderExercisesChecklist();
+          });
+          card.appendChild(label);
+        });
+        grid.appendChild(card);
+      });
+
+      document.getElementById('labCheckProgress').textContent = `${checkedCount} / ${totalTasks} tasks done`;
+    }
+
+    async function preloadAllDecks() {
+      const flashcards = [];
+      const domainQuestions = [];
+
+      // Add Oct 2026 Drift & Policy Flashcards first
+      DRIFT_ITEMS.forEach(d => {
+        flashcards.push({
+          stepId: 'updates',
+          source: '⚡ Oct 2026 Drift vs Exam Guide',
+          front: `${d.topic}: What does the CCAR-F Exam expect vs. Oct 2026 Live Docs?`,
+          fix: `Exam (v1.0): ${d.examAnswer}`,
+          why: `Live Docs (Oct 2026): ${d.liveDocs}`
+        });
+      });
+
+      for (const step of STEPS) {
+        if (step.id === 'updates') continue;
+        const md = await fetchDoc(step);
+        const lines = md.split('\n');
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].trim().startsWith('**Practice.**')) {
+            const parsed = parsePracticeBlock(lines, i, step.id);
+            if (parsed) {
+              domainQuestions.push({
+                ...parsed.question,
+                stepTitle: `${step.title.replace(/^\d+\.\s*/, '')}`
+              });
+              i = parsed.nextIdx - 1;
+            }
+          }
+          if (lines[i].trim().startsWith('|') && i + 1 < lines.length && lines[i + 1].includes('---')) {
+            const headers = lines[i].split('|').slice(1, -1).map(c => c.trim());
+            const isAntiPattern = headers[0] && headers[0].toLowerCase().includes('anti-pattern');
+            const isCheat = step.id === 'cheat';
+            if (isAntiPattern || isCheat) {
+              i += 2;
+              while (i < lines.length && lines[i].trim().startsWith('|')) {
+                const cols = lines[i].split('|').slice(1, -1).map(c => c.trim());
+                if (cols.length >= 2) {
+                  flashcards.push({
+                    stepId: step.id,
+                    source: step.title.replace(/^\d+\.\s*/, ''),
+                    front: isCheat ? `If the question is about: ${cols[0]}` : `Anti-Pattern: ${cols[0]}`,
+                    fix: isCheat ? `Think: ${cols[1]}` : `Fix: ${cols[cols.length - 1]}`,
+                    why: (!isCheat && cols.length >= 3) ? `Why it's wrong: ${cols[1]}` : ''
+                  });
+                }
+                i++;
+              }
+            }
+          }
+        }
+      }
+
+      state.flashcards = flashcards;
+      state.practiceQuestions = [
+        ...OFFICIAL_SAMPLE_QUESTIONS,
+        ...DRIFT_QUESTIONS,
+        ...domainQuestions
+      ];
+      filterFlashcards();
+      renderQuizList();
+    }
+
+    function filterFlashcards() {
+      const filter = document.getElementById('fcFilter').value;
+      state.fcFiltered = state.flashcards.filter(c => filter === 'all' || c.stepId === filter);
+      state.fcIndex = 0;
+      renderFlashcard();
+    }
+
+    function renderFlashcard() {
+      const deck = state.fcFiltered;
+      if (!deck.length) return;
+      const card = deck[state.fcIndex];
+      document.getElementById('fcCounter').textContent = `${state.fcIndex + 1} / ${deck.length}`;
+      document.getElementById('fcSource').textContent = card.source;
+      document.getElementById('fcFront').innerHTML = formatInline(card.front);
+      document.getElementById('fcFix').innerHTML = card.fix;
+      document.getElementById('fcWhy').innerHTML = card.why;
+      document.getElementById('fcBack').hidden = true;
+    }
+
+    function renderQuizList() {
+      const filter = document.getElementById('quizDomainFilter').value;
+      const list = document.getElementById('quizList');
+      list.innerHTML = '';
+      const filtered = state.practiceQuestions.filter(q => filter === 'all' || q.stepId === filter);
+      document.getElementById('drillScore').textContent = `(${filtered.length} questions — target pace: ${filtered.length * 2} mins)`;
+      filtered.forEach((q, idx) => {
+        const card = createPracticeCardEl(q, idx + 1);
+        list.appendChild(card);
+      });
+    }
+
+    // Event bindings
+    document.querySelectorAll('.tab-btn[data-mode]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn[data-mode]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const mode = btn.dataset.mode;
+        document.getElementById('mode-reader').hidden = mode !== 'reader';
+        document.getElementById('mode-drift').hidden = mode !== 'drift';
+        document.getElementById('mode-quiz').hidden = mode !== 'quiz';
+        document.getElementById('mode-flashcards').hidden = mode !== 'flashcards';
+        document.getElementById('mode-exams').hidden = mode !== 'exams';
+      });
+    });
+
+    document.getElementById('markStepDoneBtn').addEventListener('click', () => {
+      const step = STEPS[state.currentStepIdx];
+      state.completedSteps[step.id] = !state.completedSteps[step.id];
+      saveState();
+      loadStep(state.currentStepIdx);
+    });
+
+    document.getElementById('toggleBlindAllBtn').addEventListener('click', () => {
+      state.blindTables = !state.blindTables;
+      document.getElementById('toggleBlindAllBtn').textContent = state.blindTables
+        ? 'Show All Table Answers'
+        : 'Test Yourself: Hide Table Answers';
+      document.querySelectorAll('#mdContainer td[data-blindable="1"]').forEach(td => {
+        td.classList.toggle('blinded', state.blindTables);
+        td.classList.remove('revealed');
+      });
+    });
+
+    document.getElementById('prevStepBtn').addEventListener('click', () => {
+      if (state.currentStepIdx > 0) loadStep(state.currentStepIdx - 1);
+    });
+
+    document.getElementById('nextStepBtn').addEventListener('click', () => {
+      if (state.currentStepIdx < STEPS.length - 1) loadStep(state.currentStepIdx + 1);
+    });
+
+    document.getElementById('fcFilter').addEventListener('change', filterFlashcards);
+    document.getElementById('fcShuffleBtn').addEventListener('click', () => {
+      state.fcFiltered.sort(() => Math.random() - 0.5);
+      state.fcIndex = 0;
+      renderFlashcard();
+    });
+
+    const flipCurrentCard = () => {
+      const back = document.getElementById('fcBack');
+      back.hidden = !back.hidden;
+    };
+
+    document.getElementById('fcBox').addEventListener('click', flipCurrentCard);
+    document.getElementById('fcFlipBtn').addEventListener('click', flipCurrentCard);
+    document.getElementById('fcPrevBtn').addEventListener('click', () => {
+      if (state.fcFiltered.length) {
+        state.fcIndex = (state.fcIndex - 1 + state.fcFiltered.length) % state.fcFiltered.length;
+        renderFlashcard();
+      }
+    });
+    document.getElementById('fcNextBtn').addEventListener('click', () => {
+      if (state.fcFiltered.length) {
+        state.fcIndex = (state.fcIndex + 1) % state.fcFiltered.length;
+        renderFlashcard();
+      }
+    });
+
+    window.addEventListener('keydown', e => {
+      if (document.getElementById('mode-flashcards').hidden) return;
+      if (e.code === 'Space') { e.preventDefault(); flipCurrentCard(); }
+      if (e.code === 'ArrowRight') document.getElementById('fcNextBtn').click();
+      if (e.code === 'ArrowLeft') document.getElementById('fcPrevBtn').click();
+    });
+
+    document.getElementById('quizDomainFilter').addEventListener('change', renderQuizList);
+    document.getElementById('resetQuizBtn').addEventListener('click', renderQuizList);
+
+    document.getElementById('paceTimerBtn').addEventListener('click', () => {
+      const disp = document.getElementById('paceTimerDisplay');
+      const btn = document.getElementById('paceTimerBtn');
+      if (state.paceTimerId) {
+        clearInterval(state.paceTimerId);
+        state.paceTimerId = null;
+        btn.textContent = '⏱️ Start 2-Min/Q Pace Timer';
+        disp.hidden = true;
+      } else {
+        state.paceSeconds = 0;
+        disp.hidden = false;
+        btn.textContent = '⏹️ Stop Timer';
+        state.paceTimerId = setInterval(() => {
+          state.paceSeconds++;
+          const m = String(Math.floor(state.paceSeconds / 60)).padStart(2, '0');
+          const s = String(state.paceSeconds % 60).padStart(2, '0');
+          const qPace = Math.floor(state.paceSeconds / 120) + 1;
+          disp.textContent = `${m}:${s} (On pace for Q#${qPace})`;
+        }, 1000);
+      }
+    });
+
+    // Initialize
+    initDriftLab();
+    updateProgressUI();
+    loadStep(state.currentStepIdx);
+    preloadAllDecks();
+  </script>
+</body>
+</html>
