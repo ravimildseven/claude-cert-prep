@@ -2,6 +2,9 @@
 
 ![CCAF Certified](https://img.shields.io/badge/CCAF-Certified-6E44FF?style=flat-square)
 
+> ### 🚀 **[Launch the Full Interactive Study Hub (GitHub Pages)](https://ravimildseven.github.io/claude-cert-prep/)**
+> Includes the **12-Step Interactive Study Guide**, **[Oct 2026 Exam-vs-Live-Docs Drift Lab](study-guide/oct-2026-updates.md)**, **In-Scope vs. Out-of-Scope Sorter**, **12 Official Sample Questions + Domain Drills**, **Flashcards**, and the **6 Timed Mock Exams (360 Qs)** in one place.
+> *(Forked/extended from [utkarsh1agarwal/claude-architect-exam-guide](https://github.com/utkarsh1agarwal/claude-architect-exam-guide) under MIT License).*
 
 I'm certified as a **Claude Certified Architect – Foundations** (exam code **CCAR-F**, also called **CCAF**), and I'm sharing the free learning material and mock exams I built while preparing for it.
 
