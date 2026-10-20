@@ -50,6 +50,7 @@
     }
 
     * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
 
     body {
       margin: 0;
@@ -1921,17 +1922,23 @@
     }
 
     // Event bindings
-    document.querySelectorAll('.tab-btn[data-mode]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn[data-mode]').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const mode = btn.dataset.mode;
-        document.getElementById('mode-reader').hidden = mode !== 'reader';
-        document.getElementById('mode-drift').hidden = mode !== 'drift';
-        document.getElementById('mode-quiz').hidden = mode !== 'quiz';
-        document.getElementById('mode-flashcards').hidden = mode !== 'flashcards';
-        document.getElementById('mode-exams').hidden = mode !== 'exams';
+    function switchMode(mode) {
+      document.querySelectorAll('.tab-btn[data-mode]').forEach(b => {
+        b.classList.toggle('active', b.dataset.mode === mode);
       });
+      document.getElementById('mode-reader').hidden = mode !== 'reader';
+      document.getElementById('mode-drift').hidden = mode !== 'drift';
+      document.getElementById('mode-quiz').hidden = mode !== 'quiz';
+      document.getElementById('mode-flashcards').hidden = mode !== 'flashcards';
+      document.getElementById('mode-exams').hidden = mode !== 'exams';
+      if (history.replaceState) {
+        history.replaceState(null, '', '#' + mode);
+      }
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+
+    document.querySelectorAll('.tab-btn[data-mode]').forEach(btn => {
+      btn.addEventListener('click', () => switchMode(btn.dataset.mode));
     });
 
     document.getElementById('markStepDoneBtn').addEventListener('click', () => {
@@ -2024,6 +2031,10 @@
     updateProgressUI();
     loadStep(state.currentStepIdx);
     preloadAllDecks();
+    const initialHash = location.hash.replace('#', '');
+    if (['reader', 'drift', 'quiz', 'flashcards', 'exams'].includes(initialHash)) {
+      switchMode(initialHash);
+    }
   </script>
 </body>
 </html>
